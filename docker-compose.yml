@@ -1,0 +1,63 @@
+---
+services:
+  frontend:
+    restart: unless-stopped
+    container_name: frontend
+    image: localhost:5000/frontend
+    tty: True
+    ports:
+      - 3000:3000
+    networks:
+      - front
+   
+   
+
+  backend:
+    build: .
+    command: bash -c "python manage.py migrate; python manage.py loaddata bbk_data.json && python manage.py runserver 0.0.0.0:8000" 
+    restart: always
+    container_name: backend
+    image: localhost:5000/backend
+    ports:
+      - 8181:8000
+    networks:
+      - back
+      - front
+    depends_on:
+      - db
+      - frontend
+
+  db:
+    restart: always
+    container_name: database
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: django
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: django
+    networks:
+      - back
+
+networks:
+  back:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.254.0.0/24
+          gateway: 10.254.0.1
+          aux_addresses:
+            db: 10.254.0.10
+            backend: 10.254.0.20
+  front:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.100.0.0/24
+          gateway: 10.100.0.1
+          aux_addresses:
+            frontend: 10.100.0.10
+            backend: 10.100.0.20
+
+
