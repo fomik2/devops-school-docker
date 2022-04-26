@@ -1,16 +1,15 @@
 ---
 services:
   frontend:
-    restart: unless-stopped
+    build: ./frontend
+    restart: always
     container_name: frontend
-    image: localhost:5000/frontend
+    image: localhost/front-new
     tty: True
     ports:
-      - 3000:3000
+      - 3000:80
     networks:
-      - front
-   
-   
+      - front 
 
   backend:
     build: .
@@ -19,7 +18,7 @@ services:
     container_name: backend
     image: localhost:5000/backend
     ports:
-      - 8181:8000
+      - 8000:8000
     networks:
       - back
       - front
